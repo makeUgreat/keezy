@@ -1,5 +1,7 @@
 # Keezy
 
+[한국어](README.ko.md)
+
 A lightweight, browser-based GUI for managing Kubernetes Secrets. View, create, edit, and delete secrets across multiple clusters and namespaces — all from a simple web interface.
 
 ![License](https://img.shields.io/github/license/makeugreat/keezy)
