@@ -11,6 +11,12 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    {{- if .Values.tls.enabled }}
+    - port: {{ .Values.tls.port }}
+      targetPort: https
+      protocol: TCP
+      name: https
+    {{- end }}
   {{- with .Values.service.externalIPs }}
   externalIPs:
     {{- toYaml . | nindent 4 }}

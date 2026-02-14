@@ -23,6 +23,14 @@ session:
   # -- Plain-text secret value (ignored when existingSecret is set)
   secret: ""
 
+tls:
+  # -- Enable built-in TLS (HTTPS) support
+  enabled: false
+  # -- Kubernetes Secret containing tls.crt and tls.key
+  secretName: ""
+  # -- HTTPS listen port
+  port: 7122
+
 service:
   type: ClusterIP
   port: 7121

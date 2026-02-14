@@ -5,4 +5,7 @@ export const config = {
   kubeconfig: process.env.KUBECONFIG,
   k8sContext: process.env.K8S_CONTEXT,
   k8sNamespace: process.env.K8S_NAMESPACE || 'default',
+  tlsCert: process.env.TLS_CERT,
+  tlsKey: process.env.TLS_KEY,
+  tlsPort: parseInt(process.env.TLS_PORT || '7122', 10),
 };

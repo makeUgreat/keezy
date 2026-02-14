@@ -50,7 +50,7 @@ export function createApp() {
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: config.nodeEnv === 'production',
+      secure: config.nodeEnv === 'production' && !(config.tlsCert && config.tlsKey),
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     },

@@ -31,6 +31,11 @@ spec:
             - name: http
               containerPort: 7121
               protocol: TCP
+            {{- if .Values.tls.enabled }}
+            - name: https
+              containerPort: {{ .Values.tls.port }}
+              protocol: TCP
+            {{- end }}
           env:
             - name: PORT
               value: "7121"
@@ -41,6 +46,14 @@ spec:
                 secretKeyRef:
                   name: {{ include "keezy.sessionSecretName" . }}
                   key: session-secret
+            {{- if .Values.tls.enabled }}
+            - name: TLS_CERT
+              value: /etc/keezy/tls/tls.crt
+            - name: TLS_KEY
+              value: /etc/keezy/tls/tls.key
+            - name: TLS_PORT
+              value: {{ .Values.tls.port | quote }}
+            {{- end }}
             {{- with .Values.extraEnv }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -62,6 +75,18 @@ spec:
             capabilities:
               drop:
                 - ALL
+          {{- if .Values.tls.enabled }}
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /etc/keezy/tls
+              readOnly: true
+          {{- end }}
+      {{- if .Values.tls.enabled }}
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: {{ .Values.tls.secretName }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

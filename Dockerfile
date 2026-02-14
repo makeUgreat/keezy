@@ -14,6 +14,6 @@ RUN npm ci --omit=dev
 COPY --from=build /app/dist dist/
 COPY views/ views/
 COPY public/ public/
-EXPOSE 7121
+EXPOSE 7121 7122
 USER node
 CMD ["node", "dist/server.js"]
