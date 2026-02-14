@@ -1,0 +1,23 @@
+<nav class="bg-gray-900 text-white shadow-lg">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    <a href="/secrets" class="text-xl font-bold tracking-wide">Keezy</a>
+    <div class="flex items-center gap-4">
+      <form action="/context/switch" method="POST" class="flex items-center gap-2">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label class="text-sm text-gray-400">Context:</label>
+        <select name="context" class="bg-gray-800 text-white text-sm rounded px-2 py-1 border border-gray-700 auto-submit">
+          <% contexts.forEach(function(ctx) { %>
+            <option value="<%= ctx %>" <%= ctx === currentContext ? 'selected' : '' %>><%= ctx %></option>
+          <% }); %>
+        </select>
+      </form>
+      <form action="/namespace/switch" method="POST" id="nsForm" class="flex items-center gap-2">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <label class="text-sm text-gray-400">Namespace:</label>
+        <select name="namespace" id="nsSelect" class="bg-gray-800 text-white text-sm rounded px-2 py-1 border border-gray-700 auto-submit">
+          <option value="<%= currentNamespace %>" selected><%= currentNamespace %></option>
+        </select>
+      </form>
+    </div>
+  </div>
+</nav>
