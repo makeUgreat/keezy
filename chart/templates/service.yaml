@@ -11,5 +11,9 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+  {{- with .Values.service.externalIPs }}
+  externalIPs:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     {{- include "keezy.selectorLabels" . | nindent 4 }}

@@ -26,6 +26,7 @@ session:
 service:
   type: ClusterIP
   port: 7121
+  externalIPs: []
 
 ingress:
   enabled: false
