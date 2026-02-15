@@ -28,6 +28,7 @@ export function createApp() {
         scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:"],
+        upgradeInsecureRequests: isTlsEnabled(config) ? [] : null,
       },
     },
   }));
