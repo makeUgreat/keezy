@@ -54,6 +54,70 @@ npm test
 | `KUBECONFIG` | `~/.kube/config` | kubeconfig 파일 경로 |
 | `K8S_CONTEXT` | _(자동 감지)_ | 기본 Kubernetes 컨텍스트 |
 | `K8S_NAMESPACE` | `default` | 기본 네임스페이스 |
+| `TLS_CERT` | _(비활성)_ | TLS 인증서 파일 경로 |
+| `TLS_KEY` | _(비활성)_ | TLS 개인 키 파일 경로 |
+| `TLS_PORT` | `7122` | HTTPS 리슨 포트 |
+
+## HTTP / HTTPS
+
+기본적으로 Keezy는 **HTTP 전용**으로 실행됩니다. 별도 설정 없이 서버를 시작하면 `http://localhost:7121`로 접속할 수 있습니다.
+
+### HTTPS 활성화 (내장 TLS)
+
+HTTPS를 활성화하려면 인증서와 개인 키를 모두 지정합니다:
+
+```bash
+TLS_CERT=/path/to/cert.pem
+TLS_KEY=/path/to/key.pem
+TLS_PORT=7122  # 선택사항, 기본값 7122
+```
+
+TLS가 설정된 경우:
+
+- HTTP 서버는 `PORT` (기본 `7121`)에서 계속 실행됩니다
+- HTTPS 서버가 `TLS_PORT` (기본 `7122`)에서 추가로 시작됩니다
+- 세션 및 CSRF 쿠키에 `Secure` 플래그가 자동으로 설정됩니다 (브라우저가 HTTPS에서만 쿠키를 전송)
+
+TLS가 **설정되지 않은** 경우:
+
+- HTTP 서버만 실행됩니다
+- 쿠키에 `Secure` 플래그가 설정되지 **않으므로**, 일반 HTTP에서 모든 기능이 정상 동작합니다
+
+> **참고:** HTTPS를 활성화하려면 `TLS_CERT`와 `TLS_KEY`를 모두 지정해야 합니다. 하나만 설정하면 HTTP 전용 모드로 동작합니다.
+
+### Kubernetes에서 TLS 설정 (Helm)
+
+Helm values로 내장 TLS를 활성화할 수 있습니다:
+
+```yaml
+tls:
+  enabled: true
+  secretName: my-tls-secret   # tls.crt와 tls.key가 포함된 K8s Secret
+  port: 7122
+```
+
+차트가 지정된 Kubernetes Secret에서 인증서를 마운트하고 환경변수를 자동으로 구성합니다.
+
+### 권장 프로덕션 구성
+
+대부분의 프로덕션 환경에서는 애플리케이션 내부가 아닌 Ingress 또는 로드밸런서에서 TLS를 종료하는 것이 일반적입니다:
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: keezy.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: keezy-tls
+      hosts:
+        - keezy.example.com
+```
+
+이 구성에서는 Ingress가 외부 HTTPS를 처리하고 Keezy는 내부적으로 HTTP로 실행됩니다. Keezy가 애플리케이션 수준에서 TLS가 설정되지 않았음을 감지하므로 쿠키에 `Secure` 플래그가 설정되지 않으며, Ingress와 Pod 간의 클러스터 내 트래픽이 HTTP이므로 이것이 올바른 동작입니다.
 
 ## Kubernetes 배포
 
@@ -83,6 +147,12 @@ image:
 service:
   type: ClusterIP
   port: 7121
+
+# 내장 TLS (기본 비활성화)
+tls:
+  enabled: false
+  secretName: ""       # tls.crt / tls.key가 포함된 K8s Secret
+  port: 7122
 
 # 세션 시크릿 (택 1):
 session:

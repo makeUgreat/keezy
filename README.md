@@ -56,6 +56,70 @@ npm test
 | `KUBECONFIG` | `~/.kube/config` | Path to kubeconfig file |
 | `K8S_CONTEXT` | _(auto-detected)_ | Default Kubernetes context |
 | `K8S_NAMESPACE` | `default` | Default namespace |
+| `TLS_CERT` | _(disabled)_ | Path to TLS certificate file |
+| `TLS_KEY` | _(disabled)_ | Path to TLS private key file |
+| `TLS_PORT` | `7122` | HTTPS listen port |
+
+## HTTP / HTTPS
+
+By default, Keezy runs on **HTTP only**. No extra configuration is needed — just start the server and access it via `http://localhost:7121`.
+
+### Enabling HTTPS (Built-in TLS)
+
+To enable HTTPS, provide both a certificate and a private key:
+
+```bash
+TLS_CERT=/path/to/cert.pem
+TLS_KEY=/path/to/key.pem
+TLS_PORT=7122  # optional, defaults to 7122
+```
+
+When TLS is configured:
+
+- The HTTP server continues to run on `PORT` (default `7121`)
+- An additional HTTPS server starts on `TLS_PORT` (default `7122`)
+- Session and CSRF cookies are automatically set with the `Secure` flag (browser only sends them over HTTPS)
+
+When TLS is **not** configured:
+
+- Only the HTTP server runs
+- Cookies are set **without** the `Secure` flag, so everything works correctly over plain HTTP
+
+> **Note:** Both `TLS_CERT` and `TLS_KEY` must be provided for HTTPS to activate. If only one is set, Keezy falls back to HTTP-only mode.
+
+### TLS in Kubernetes (Helm)
+
+Enable built-in TLS via Helm values:
+
+```yaml
+tls:
+  enabled: true
+  secretName: my-tls-secret   # K8s Secret containing tls.crt and tls.key
+  port: 7122
+```
+
+The chart mounts the certificate from the specified Kubernetes Secret and configures the environment variables automatically.
+
+### Recommended Production Setup
+
+For most production deployments, terminate TLS at the Ingress or load balancer level rather than within the application:
+
+```yaml
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: keezy.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: keezy-tls
+      hosts:
+        - keezy.example.com
+```
+
+In this setup, the Ingress handles HTTPS externally while Keezy runs on HTTP internally. Since Keezy detects that TLS is not configured at the application level, cookies are set without the `Secure` flag, which is correct because the in-cluster traffic between Ingress and Pod is HTTP.
 
 ## Deploying to Kubernetes
 
@@ -85,6 +149,12 @@ image:
 service:
   type: ClusterIP
   port: 7121
+
+# Built-in TLS (disabled by default)
+tls:
+  enabled: false
+  secretName: ""       # K8s Secret with tls.crt / tls.key
+  port: 7122
 
 # Session secret (pick one):
 session:

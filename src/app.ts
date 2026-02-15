@@ -5,7 +5,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import flash from 'connect-flash';
-import { config } from './config';
+import { config, isTlsEnabled } from './config';
 import { doubleCsrfProtection } from './middleware/csrf';
 import { k8sClientMiddleware } from './middleware/k8sClient';
 import { localsMiddleware } from './middleware/locals';
@@ -50,7 +50,7 @@ export function createApp() {
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: config.nodeEnv === 'production' && !(config.tlsCert && config.tlsKey),
+      secure: isTlsEnabled(config),
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
     },

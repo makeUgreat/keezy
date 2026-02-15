@@ -1,5 +1,5 @@
 import { doubleCsrf } from 'csrf-csrf';
-import { config } from '../config';
+import { config, isTlsEnabled } from '../config';
 
 const { doubleCsrfProtection, generateToken } = doubleCsrf({
   getSecret: () => config.sessionSecret,
@@ -7,7 +7,7 @@ const { doubleCsrfProtection, generateToken } = doubleCsrf({
   cookieOptions: {
     httpOnly: true,
     sameSite: 'strict',
-    secure: config.nodeEnv === 'production' && !(config.tlsCert && config.tlsKey),
+    secure: isTlsEnabled(config),
   },
   getTokenFromRequest: (req) => req.body?._csrf || req.headers['x-csrf-token'],
 });
