@@ -21,6 +21,7 @@ export function createApp() {
 
   // Security
   app.use(helmet({
+    hsts: isTlsEnabled(config),
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
